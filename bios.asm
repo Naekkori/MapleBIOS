@@ -10,6 +10,8 @@ start:
     mov sp, 0xFFFE
     sti
 
+    call clear_screen
+
     ; 환영 메시지 출력
     mov  si, msg_welcome
     call print_string
@@ -38,9 +40,11 @@ start:
 
 ; --- 셋업 메뉴 루틴 (독립된 섹션) ---
 enter_setup:
+    call clear_screen
+
     mov ah, 0x00 ; 키 버퍼 비우기
     int 0x16
-    
+
     mov  si, msg_enter_setup
     call print_string
 
@@ -83,6 +87,10 @@ boot_os:
 .error:
     mov  si, msg_os_not_found
     call print_string
+
+    mov  si, msg_os_retryhint
+    call print_string
+    
     hlt
 .halt_loop:
     hlt            ; CPU 정지 (인터럽트 발생 시까지)
@@ -99,15 +107,21 @@ print_string:
 .done:
     ret
 
+clear_screen: ; 화면 전부 지우기
+    mov ah, 0x06
+    mov al, 0x00
+    int 0x10
+    ret
 ; --- 데이터 영역 ---
 msg_welcome             db 'MapleVM BIOS 1.0', 13, 10, 0
 msg_setup_info          db 'Press any key to enter Setup...', 13, 10, 0
 msg_setup_title         db 13, 10, '--- Setup Menu ---', 13, 10, 0
-msg_setup_notimplements db 'Status: Not implemented yet.', 13, 10, 0
+msg_setup_notimplements db 'Not implemented yet.', 13, 10, 0
 msg_setup_pressback     db 'Press Q key to back...', 13, 10, 0
 msg_enter_setup         db 13, 10, 'Entering Setup Menu...', 13, 10, 0
 msg_booting             db 'Booting from ROM...', 13, 10, 0
 msg_os_not_found        db 'Error: OS not found.', 13, 10, 0
+msg_os_retryhint        db 'Press any key to retry...', 13, 10, 0
 
 ; --- 패딩 및 리셋 벡터 ---
 times 65520-($-$$)      db 0
