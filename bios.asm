@@ -120,7 +120,7 @@ msg_setup_title         db 13, 10, '--- Setup Menu ---', 13, 10, 0
 msg_setup_notimplements db 'Not implemented yet.', 13, 10, 0
 msg_setup_pressback     db 'Press Q key to back...', 13, 10, 0
 msg_enter_setup         db 13, 10, 'Entering Setup Menu...', 13, 10, 0
-msg_booting             db 'Booting from ROM...', 13, 10, 0
+msg_booting             db 'Booting from DISK...', 13, 10, 0
 msg_os_not_found        db 'Error: OS not found.', 13, 10, 0
 msg_os_retryhint        db 'Press any key to retry...', 13, 10, 0
 
