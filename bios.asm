@@ -11,7 +11,8 @@ start:
     sti
 
     call clear_screen
-
+.flush_keys:
+.print_welcome:
     ; 환영 메시지 출력
     mov  si, msg_welcome
     call print_string
@@ -90,7 +91,7 @@ boot_os:
 
     mov  si, msg_os_retryhint
     call print_string
-    
+
     hlt
 .halt_loop:
     hlt            ; CPU 정지 (인터럽트 발생 시까지)
