@@ -92,10 +92,13 @@ boot_os:
     mov  si, msg_os_retryhint
     call print_string
 
-    hlt
-.halt_loop:
-    hlt            ; CPU 정지 (인터럽트 발생 시까지)
-    jmp .halt_loop ; 인터럽트로 깨어나도 다시 정지 (완전 무한 루프)
+    ; 키 입력 대기 (AH=00h, INT 16h)
+    mov ah, 0x00
+    int 0x16
+
+    ; 키가 눌리면 시스템 재시작 (처음으로 점프)
+    jmp start
+
 ; --- 문자열 출력 공용 함수 (일반 라벨) ---
 print_string:
     mov ah, 0x0E
