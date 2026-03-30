@@ -19,7 +19,7 @@ start:
     call print_string
 
     ; 대기 루프
-    mov dx, 20 ; 20 초 대기
+    mov dx, 30
 .wait_outer:
     mov cx, 0xFFFF
 .wait_inner:
