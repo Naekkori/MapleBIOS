@@ -11,7 +11,7 @@ start:
     sti
 
     call clear_screen
-.flush_keys:
+    call post_bell
 .print_welcome:
     ; 환영 메시지 출력
     mov  si, msg_welcome
@@ -89,7 +89,7 @@ boot_os:
     ; 추가: 기존에 눌려있던 키가 있다면 무시하기 위해 버퍼 확인 및 제거
     mov ah, 0x01
     int 0x16
-    jz .no_flush
+    jz  .no_flush
     mov ah, 0x00
     int 0x16
 .no_flush:
@@ -122,6 +122,34 @@ clear_screen: ; 화면 전부 지우기
     mov ah, 0x06
     mov al, 0x00
     int 0x10
+    ret
+; --- 시스템 벨 --
+post_bell:
+    ; 음높이 설정 (약간 높게 설정하여 '띡' 느낌 부여)
+    mov dx, 0x402
+    mov al, 160      ; 기존 100에서 160으로 높임 (더 날카로운 소리)
+    out dx, al
+
+    ; 볼륨 설정
+    mov dx, 0x404
+    mov al, 70       ; 너무 크지 않게 70% 정도로 조절
+    out dx, al
+
+    ; 재생 시작
+    mov dx, 0x400
+    mov al, 1
+    out dx, al
+
+    ; --- 아주 짧은 딜레이 (Busy Wait) ---
+    mov cx, 0x2000
+.delay:
+    nop
+    loop .delay
+
+    ; 소리 즉시 끄기
+    mov dx, 0x400
+    mov al, 0
+    out dx, al
     ret
 ; --- 데이터 영역 ---
 msg_welcome             db 'MapleVM BIOS 1.0', 13, 10, 0
