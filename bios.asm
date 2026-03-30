@@ -86,6 +86,13 @@ boot_os:
 
     jmp 0x07C0:0000 ; 로드된 부트로더 로 점프
 .error:
+    ; 추가: 기존에 눌려있던 키가 있다면 무시하기 위해 버퍼 확인 및 제거
+    mov ah, 0x01
+    int 0x16
+    jz .no_flush
+    mov ah, 0x00
+    int 0x16
+.no_flush:
     mov  si, msg_os_not_found
     call print_string
 
