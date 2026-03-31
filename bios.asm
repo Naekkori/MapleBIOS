@@ -46,9 +46,6 @@ enter_setup:
     mov ah, 0x00 ; 키 버퍼 비우기
     int 0x16
 
-    mov  si, msg_enter_setup
-    call print_string
-
     mov  si, msg_setup_title
     call print_string
 
@@ -154,10 +151,13 @@ post_bell:
 ; --- 데이터 영역 ---
 msg_welcome             db 'MapleVM BIOS 1.0', 13, 10, 0
 msg_setup_info          db 'Press any key to enter Setup...', 13, 10, 0
-msg_setup_title         db 13, 10, '--- Setup Menu ---', 13, 10, 0
+msg_setup_title         db 13, 10 ; 상자 위 여백
+                        db 0xC9, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xBB, 13, 10 ; ╔════════════╗
+                        db 0xBA, ' ', 'Setup Menu', ' ', 0xBA, 13, 10                                                 ; ║ Setup Menu ║
+                        db 0xC8, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xBC, 13, 10 ; ╚════════════╝
+                        db 0 ; 전체 문자열의 끝을 알리는 NULL
 msg_setup_notimplements db 'Not implemented yet.', 13, 10, 0
 msg_setup_pressback     db 'Press Q key to back...', 13, 10, 0
-msg_enter_setup         db 13, 10, 'Entering Setup Menu...', 13, 10, 0
 msg_booting             db 'Booting from DISK...', 13, 10, 0
 msg_os_not_found        db 'Error: OS not found.', 13, 10, 0
 msg_os_retryhint        db 'Press any key to retry...', 13, 10, 0
