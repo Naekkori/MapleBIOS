@@ -1,5 +1,5 @@
 ;======================================
-;            MapleVM BIOS 1.1
+;            MapleVM BIOS 1.2
 ;            Author: Naekkori
 ;======================================
 [BITS 16]
@@ -70,30 +70,35 @@ enter_setup:
 
 ; --- 부팅 시도 루틴 ---
 boot_os:
-    ;MBR 읽기시도 (INT 13h, AH=02h)
-    mov ax, 0x07C0 ; MBR 이 로드될 세그먼트
+    cli
+    xor ax, ax
+    mov ss, ax
+    mov sp, 0xFFFE
+    sti
+
+    ; 1. 먼저 디스크(MBR)를 메모리로 읽어옵니다.
+    mov ax, 0x0000 ; ES를 0으로 설정 (0x7C00에 바로 쓰기 위해)
     mov es, ax
-    xor bx, bx     ; ES:BX = 07C0:0000 (물리주소 0x7C00)
+    mov bx, 0x7C00 ; 목적지 주소 ES:BX = 0000:7C00
 
-    mov ah, 0x02 ; 섹터 읽기 서비스
-    mov al, 1    ; 1 개의 섹터
-    mov ch, 0    ; 0 번 실린더
-    mov cl, 1    ; 1 번 섹터 (부트 섹터)
-    mov dh, 0    ; 0 번 헤드
-    mov dl, 0x80 ; 첫번째 HDD
-    int 0x13
+    mov ah, 0x02   ; 섹터 읽기 서비스
+    mov al, 1      ; 1개 섹터
+    mov ch, 0      ; 0번 실린더
+    mov cl, 1      ; 1번 섹터
+    mov dh, 0      ; 0번 헤드
+    mov dl, 0x80   ; 첫번째 HDD
+    int 0x13       ; 이제 CPUCore의 INT 13h 핸들러가 작동!
 
-    jc .error ; Carry Flag 가 세팅 되면 에러
+    jc .error      ; 읽기 실패 시 에러 처리 (Carry Flag 확인)
 
-    ; --- 부팅 성공 시 ---
-    jmp 0x0000:0x7C00   ; 읽어온 부트 섹터 위치로 멀리 점프(Far Jump)
+    ; 2. 읽기가 성공했다면, 데이터가 들어있는 0x7C00으로 점프.
+    jmp 0x0000:0x7C00
+
 .error:
-    ; 추가: 기존에 눌려있던 키가 있다면 무시하기 위해 버퍼 확인 및 제거
-    mov ah, 0x01
-    int 0x16
-    jz  .no_flush
-    mov ah, 0x00
-    int 0x16
+    ; 에러 메시지 출력 루틴
+    mov si, msg_os_not_found
+    call print_string
+    hlt
 .no_flush:
     mov  si, msg_os_not_found
     call print_string
@@ -154,7 +159,7 @@ post_bell:
     out dx, al
     ret
 ; --- 데이터 영역 ---
-msg_welcome             db 'MapleVM BIOS 1.0', 13, 10, 0
+msg_welcome             db 'MapleVM BIOS 1.2', 13, 10, 0
 msg_setup_info          db 'Press any key to enter Setup...', 13, 10, 0
 msg_setup_title         db 13, 10 ; 상자 위 여백
                         db 0xC9, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xBB, 13, 10 ; ╔════════════╗
