@@ -1,5 +1,5 @@
 ;======================================
-;            MapleVM BIOS 1.2
+;            MapleVM BIOS 1.2.1
 ;            Author: Naekkori
 ;======================================
 [BITS 16]
@@ -26,7 +26,7 @@ start:
     call print_string
 
     ; 대기 루프
-    mov dx, 30
+    mov dx, 3
 .wait_outer:
     mov cx, 0xFFFF
 .wait_inner:
@@ -159,7 +159,7 @@ post_bell:
     out dx, al
     ret
 ; --- 데이터 영역 ---
-msg_welcome             db 'MapleVM BIOS 1.2', 13, 10, 0
+msg_welcome             db 'MapleVM BIOS 1.2.1', 13, 10, 0
 msg_setup_info          db 'Press any key to enter Setup...', 13, 10, 0
 msg_setup_title         db 13, 10 ; 상자 위 여백
                         db 0xC9, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xCD, 0xBB, 13, 10 ; ╔════════════╗
