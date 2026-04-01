@@ -6,6 +6,28 @@
 org 0x0000
 
 start:
+    jmp biosmain
+; --- 0x0100 지점에 INT 10h / 13h 핸들러 배치 ---
+times 0x0100 - ($ - $$) db 0
+int10_handler:
+    ; (현재는 MapleVMBIOS.mlua에서 이 주소로 점프하게 되어 있음)
+    ; 여기에 실제 화면 출력/디스크 핸들링 로직을 넣거나, 간단히 iret 처리
+    iret
+
+; --- 0x0200 지점에 INT 12h 핸들러 배치 ---
+times 0x0200 - ($ - $$) db 0
+int12_handler:
+    mov ax, 640    ; 메모리 640KB 보고
+    iret
+
+; --- 0x0400 지점에 INT 16h 핸들러 배치 ---
+times 0x0400 - ($ - $$) db 0
+int16_handler:
+    ; 키보드 서비스 핸들러
+    iret
+
+times 0x0500 - ($ - $$) db 0
+biosmain:
     cli
     xor ax, ax
     mov ds, ax
