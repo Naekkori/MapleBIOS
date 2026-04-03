@@ -108,12 +108,24 @@ biosmain:
     ; 3. 비프음 (POST 성공)
     call beep
 
+boot_entry: 
+    mov si, msg_booting
+    call print_string
     ; 4. 부팅 시도
     int 0x19
 
+    jc .wait_and_try
+
     ; 5. 부팅 실패 시 메시지 출력 후 정지
+    call beep_os_not_found
     mov si, msg_os_not_found ; msg_boot_fail 대신 정의된 라벨 사용
     call print_string
+.wait_and_try:
+    ;디스크가 셀프테스트 중일수 있으므로 8초대기
+    mov cx, 80
+    call sleep
+    ;재시도
+    jmp boot_entry
 .halt:
     hlt
     jmp .halt
@@ -192,7 +204,48 @@ beep:
     pop ax
     pop dx
     ret
+beep_os_not_found:
+    push dx
+    push ax
+    push cx
 
+    ; OS를 찿을수 없으면 3번 울림
+    mov dx, 0x402
+    mov al, 0xA0
+    out dx, al
+    mov dx, 0x404
+    mov al, 70
+    out dx, al
+    mov dx, 0x400
+    mov al, 1
+    out dx, al
+
+    mov cx, 3
+    call sleep
+
+    mov al, 0
+    mov dx, 0x400
+    out dx, al
+
+    mov cx, 3
+    call sleep
+
+    mov dx, 0x400
+    mov al, 1
+    out dx, al
+    
+    mov cx, 3
+    call sleep
+
+    mov al, 0
+    mov dx, 0x400     
+    out dx, al
+    ; -----------------------
+
+    pop cx
+    pop ax
+    pop dx
+    ret
 ; --- 데이터 영역 ---
 msg_welcome             db 'MapleVM BIOS 1.2.2', 13, 10, 0
 msg_setup_info          db 'Press any key to enter Setup...', 13, 10, 0
