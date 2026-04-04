@@ -1,5 +1,5 @@
 ;======================================
-;            MapleVM BIOS 1.2.2
+;            MapleVM BIOS 1.2.3
 ;            Author: Naekkori
 ;======================================
 [BITS 16]
@@ -102,33 +102,32 @@ biosmain:
 
     ; 2. 화면 초기화 및 환영 메시지
     call clear_screen
+
     mov si, msg_welcome
     call print_string
 
     ; 3. 비프음 (POST 성공)
     call beep
+    ; 부팅 진입
+    call boot_entry
+; 부팅 실패 시 혹은 모든 로직 종료 시 여기서 멈춤
+.bios_halt:
+    hlt
+    jmp .bios_halt
 
 boot_entry: 
     mov si, msg_booting
     call print_string
-    ; 4. 부팅 시도
     int 0x19
 
-    jc .wait_and_try
-
-    ; 5. 부팅 실패 시 메시지 출력 후 정지
+    ; int 0x19가 리턴되었다는 건 부팅 실패를 의미함
     call beep_os_not_found
-    mov si, msg_os_not_found ; msg_boot_fail 대신 정의된 라벨 사용
+    mov si, msg_os_not_found
     call print_string
-.wait_and_try:
-    ;디스크가 셀프테스트 중일수 있으므로 8초대기
-    mov cx, 80
-    call sleep
-    ;재시도
-    jmp boot_entry
+
 .halt:
     hlt
-    jmp .halt
+    jmp .halt ; 재시도하지 않고 여기서 멈춤
 
 ; --- 함수 라이브러리 ---
 ; ---------------------------------------------------------
