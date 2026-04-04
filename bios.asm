@@ -122,8 +122,10 @@ boot_entry:
 
     ; int 0x19가 리턴되었다는 건 부팅 실패를 의미함
     call beep_os_not_found
+    
     mov si, msg_os_not_found
     call print_string
+    jmp $ ; 여기서 정지시켜서 로그 확인
 
 .halt:
     hlt
