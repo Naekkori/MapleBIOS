@@ -119,7 +119,7 @@ boot_entry:
     mov si, msg_booting
     call print_string
     int 0x19
-    
+
     ; int 0x19가 리턴되었다는 건 부팅 실패를 의미함
     mov si, msg_os_not_found
     call print_string
@@ -140,20 +140,26 @@ sleep:
     push ax
     push ds
     push bx
+    push cx
 
     mov ax, 0x0040
     mov ds, ax
-    mov bx, [0x006C]    ; 현재 틱 카운터(Low Word) 읽기
-    add bx, cx          ; 목표 틱 계산
 
-.wait:
-    cmp [0x006C], bx    ; 현재 틱이 목표에 도달했는지 확인
-    jb .wait            ; 아직 도달하지 않았다면 계속 대기
+.tick_loop:
+    mov bx, [0x006C]    ; 현재 틱 읽기
+.wait_change:
+    hlt                 ; 다음 인터럽트 대기 (타이머 등)
+    cmp [0x006C], bx    ; 틱이 변했는지 확인
+    je .wait_change     ; 변하지 않았으면 다시 대기
+    
+    loop .tick_loop     ; CX번 반복
 
+    pop cx
     pop bx
     pop ds
     pop ax
     ret
+
 print_string:
     push ax
     push si
@@ -205,43 +211,40 @@ beep:
     pop ax
     pop dx
     ret
+
 beep_os_not_found:
     push dx
     push ax
     push cx
 
-    ; OS를 찿을수 없으면 3번 울림
+    ; OS를 찾을 수 없으면 3번 울림
     mov dx, 0x402
     mov al, 0xA0
     out dx, al
     mov dx, 0x404
     mov al, 70
     out dx, al
-    mov dx, 0x400
-    mov al, 1
-    out dx, al
 
-    mov cx, 3
-    call sleep
-
-    mov al, 0
-    mov dx, 0x400
-    out dx, al
-
-    mov cx, 3
-    call sleep
-
+    mov cx, 3           ; 3번 반복
+.loop:
+    push cx
+    ; 스피커 켜기
     mov dx, 0x400
     mov al, 1
     out dx, al
     
-    mov cx, 3
+    mov cx, 2           ; 켜짐 유지 (약 110ms)
     call sleep
 
+    ; 스피커 끄기
     mov al, 0
-    mov dx, 0x400     
     out dx, al
-    ; -----------------------
+
+    mov cx, 2           ; 꺼짐 유지 (약 110ms)
+    call sleep
+    
+    pop cx
+    loop .loop
 
     pop cx
     pop ax
