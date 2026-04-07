@@ -119,12 +119,12 @@ boot_entry:
     mov si, msg_booting
     call print_string
     int 0x19
-
-    ; int 0x19가 리턴되었다는 건 부팅 실패를 의미함
-    call beep_os_not_found
     
+    ; int 0x19가 리턴되었다는 건 부팅 실패를 의미함
     mov si, msg_os_not_found
     call print_string
+
+    call beep_os_not_found
     jmp $ ; 여기서 정지시켜서 로그 확인
 
 .halt:
